@@ -14,7 +14,8 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         colorScheme: .fromSeed(seedColor: Colors.deepPurple),
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: const MyHomePage(title: 'Stryukov A.A. PIbd-32'),
+      debugShowCheckedModeBanner: false,
     );
   }
 }
