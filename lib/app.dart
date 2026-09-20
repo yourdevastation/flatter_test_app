@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'core/theme/app_theme.dart';
+import 'package:flutter_test_app/core/theme/app_theme.dart';
 
 class MiniTasksApp extends StatelessWidget {
   const MiniTasksApp({super.key});
