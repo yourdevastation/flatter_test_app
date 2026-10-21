@@ -14,4 +14,6 @@ abstract interface class TaskRepository {
   });
 
   Future<Result<Task>> toggleTask(String id);
+
+  Future<Result<Task>> setFavorite(String id, {required bool isFavorite});
 }

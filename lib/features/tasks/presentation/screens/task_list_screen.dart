@@ -1,7 +1,10 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test_app/features/tasks/data/repositories/in_memory_task_repository.dart';
+import 'package:flutter_test_app/features/tasks/domain/entities/task.dart';
 import 'package:flutter_test_app/features/tasks/domain/entities/task_filter.dart';
 import 'package:flutter_test_app/features/tasks/presentation/mappers/task_card_mapper.dart';
+import 'package:flutter_test_app/features/tasks/presentation/screens/task_detail_screen.dart';
 import 'package:flutter_test_app/features/tasks/presentation/view_models/task_list_view_model.dart';
 import 'package:flutter_test_app/features/tasks/presentation/widgets/add_task_dialog.dart';
 import 'package:flutter_test_app/features/tasks/presentation/widgets/priority_chip.dart';
@@ -23,6 +26,15 @@ class _TaskListScreenState extends State<TaskListScreen> {
     super.initState();
     _viewModel = TaskListViewModel(InMemoryTaskRepository());
     _viewModel.loadTasks();
+
+    // В initState ещё нельзя обращаться к ScaffoldMessenger через context:
+    // дерево не построено. Поэтому откладываем показ до конца первого кадра.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _showSnackBar(
+        message: 'Нажми на карточку, чтобы открыть подробности',
+        icon: Icons.touch_app_outlined,
+      );
+    });
   }
 
   @override
@@ -83,7 +95,8 @@ class _TaskListScreenState extends State<TaskListScreen> {
                               onChanged: (_) => _viewModel.toggleTask(task),
                             ),
                             trailing: PriorityChip(priority: task.priority),
-                            onTap: () => _viewModel.toggleTask(task),
+                            onTap: () => _openDetails(task),
+                            onLike: _onLike,
                           );
                         },
                       ),
@@ -91,6 +104,57 @@ class _TaskListScreenState extends State<TaskListScreen> {
             ],
           );
         },
+      ),
+    );
+  }
+
+  void _onLike(String id, String title, bool isLiked) {
+    _viewModel.setFavorite(id, isFavorite: isLiked);
+
+    _showSnackBar(
+      message: isLiked
+          ? '«$title» добавлена в избранное'
+          : '«$title» убрана из избранного',
+      icon: isLiked ? Icons.favorite : Icons.heart_broken_outlined,
+      action: SnackBarAction(
+        label: 'Отменить',
+        onPressed: () => _viewModel.setFavorite(id, isFavorite: !isLiked),
+      ),
+    );
+  }
+
+  void _showSnackBar({
+    required String message,
+    required IconData icon,
+    SnackBarAction? action,
+  }) {
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          behavior: SnackBarBehavior.floating,
+          // С action снекбар по умолчанию не скрывается сам.
+          persist: false,
+          action: action,
+          content: Row(
+            children: [
+              Icon(icon, color: Theme.of(context).colorScheme.onInverseSurface),
+              const SizedBox(width: 12),
+              Expanded(child: Text(message)),
+            ],
+          ),
+        ),
+      );
+  }
+
+  void _openDetails(Task task) {
+    Navigator.of(context).push(
+      CupertinoPageRoute<void>(
+        builder: (context) => TaskDetailScreen(
+          taskId: task.id,
+          viewModel: _viewModel,
+          onLike: _onLike,
+        ),
       ),
     );
   }

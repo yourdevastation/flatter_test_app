@@ -55,8 +55,10 @@ class InMemoryTaskRepository implements TaskRepository {
           title: title,
           description: description,
           isCompleted: i % 2 == 0,
+          isFavorite: i == 1,
           priority: priority,
           category: category,
+          createdAt: DateTime.now().subtract(Duration(days: i * 2)),
         ),
       );
     }
@@ -85,6 +87,7 @@ class InMemoryTaskRepository implements TaskRepository {
       isCompleted: false,
       priority: priority,
       category: category,
+      createdAt: DateTime.now(),
     );
 
     _tasks.add(task);
@@ -93,7 +96,22 @@ class InMemoryTaskRepository implements TaskRepository {
   }
 
   @override
-  Future<Result<Task>> toggleTask(String id) async {
+  Future<Result<Task>> toggleTask(String id) {
+    return _updateTask(
+      id,
+      (task) => task.copyWith(isCompleted: !task.isCompleted),
+    );
+  }
+
+  @override
+  Future<Result<Task>> setFavorite(String id, {required bool isFavorite}) {
+    return _updateTask(id, (task) => task.copyWith(isFavorite: isFavorite));
+  }
+
+  Future<Result<Task>> _updateTask(
+    String id,
+    Task Function(Task task) update,
+  ) async {
     await Future<void>.delayed(const Duration(milliseconds: 200));
 
     final index = _tasks.indexWhere((task) => task.id == id);
@@ -102,9 +120,7 @@ class InMemoryTaskRepository implements TaskRepository {
       return const Result.failure('Задача не найдена');
     }
 
-    final updatedTask = _tasks[index].copyWith(
-      isCompleted: !_tasks[index].isCompleted,
-    );
+    final updatedTask = update(_tasks[index]);
 
     _tasks[index] = updatedTask;
 

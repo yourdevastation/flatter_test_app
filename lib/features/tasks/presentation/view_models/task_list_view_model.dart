@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter_test_app/core/models/result.dart';
 import 'package:flutter_test_app/features/tasks/domain/entities/task.dart';
 import 'package:flutter_test_app/features/tasks/domain/entities/task_category.dart';
 import 'package:flutter_test_app/features/tasks/domain/entities/task_filter.dart';
@@ -62,16 +63,29 @@ class TaskListViewModel extends ChangeNotifier {
     }
   }
 
+  Task? findTask(String id) =>
+      _allTasks.where((task) => task.id == id).firstOrNull;
+
   Future<void> toggleTask(Task task) async {
-    final result = await _repository.toggleTask(task.id);
+    _replaceTask(await _repository.toggleTask(task.id));
+  }
 
-    if (result.isSuccess && result.data != null) {
-      final index = _allTasks.indexWhere((item) => item.id == task.id);
+  Future<void> setFavorite(String id, {required bool isFavorite}) async {
+    _replaceTask(await _repository.setFavorite(id, isFavorite: isFavorite));
+  }
 
-      if (index != -1) {
-        _allTasks[index] = result.data!;
-        notifyListeners();
-      }
+  void _replaceTask(Result<Task> result) {
+    final updatedTask = result.data;
+
+    if (result.isFailure || updatedTask == null) {
+      return;
+    }
+
+    final index = _allTasks.indexWhere((item) => item.id == updatedTask.id);
+
+    if (index != -1) {
+      _allTasks[index] = updatedTask;
+      notifyListeners();
     }
   }
 
@@ -91,6 +105,8 @@ class TaskListViewModel extends ChangeNotifier {
         _allTasks.where((task) => !task.isCompleted).toList(),
       TaskFilter.completed =>
         _allTasks.where((task) => task.isCompleted).toList(),
+      TaskFilter.favorite =>
+        _allTasks.where((task) => task.isFavorite).toList(),
     };
   }
 

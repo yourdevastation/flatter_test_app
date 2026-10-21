@@ -1,7 +1,8 @@
 enum TaskFilter {
   all('Все'),
   active('Активные'),
-  completed('Завершённые');
+  completed('Завершённые'),
+  favorite('Избранные');
 
   const TaskFilter(this.label);
 
