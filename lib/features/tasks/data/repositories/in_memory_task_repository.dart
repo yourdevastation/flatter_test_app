@@ -1,5 +1,6 @@
 import 'package:flutter_test_app/core/models/result.dart';
 import 'package:flutter_test_app/features/tasks/domain/entities/task.dart';
+import 'package:flutter_test_app/features/tasks/domain/entities/task_category.dart';
 import 'package:flutter_test_app/features/tasks/domain/entities/task_priority.dart';
 import 'package:flutter_test_app/features/tasks/domain/repositories/task_repository.dart';
 
@@ -12,21 +13,50 @@ class InMemoryTaskRepository implements TaskRepository {
 
   void _generateInitialTasks() {
     const initialData = [
-      ('Изучить основы Flutter', TaskPriority.high),
-      ('Выполнить лабораторную работу', TaskPriority.high),
-      ('Посмотреть видео про MVVM', TaskPriority.medium),
-      ('Составить список покупок', TaskPriority.low),
+      (
+        'Изучить основы Flutter',
+        'Виджеты, layout и работа с состоянием',
+        TaskPriority.high,
+        TaskCategory.study,
+      ),
+      (
+        'Выполнить лабораторную работу',
+        'Список карточек с картинкой, иконкой и текстом',
+        TaskPriority.high,
+        TaskCategory.study,
+      ),
+      (
+        'Подготовить отчёт по проекту',
+        'Собрать результаты спринта и отправить команде',
+        TaskPriority.medium,
+        TaskCategory.work,
+      ),
+      (
+        'Составить список покупок',
+        'Овощи, крупы и что-нибудь к чаю',
+        TaskPriority.low,
+        TaskCategory.shopping,
+      ),
+      ('Сходить на тренировку', null, TaskPriority.medium, TaskCategory.health),
+      (
+        'Навести порядок на кухне',
+        'Помыть посуду и разобрать шкафчики',
+        TaskPriority.low,
+        TaskCategory.home,
+      ),
     ];
 
     for (var i = 0; i < initialData.length; i++) {
-      final (title, priority) = initialData[i];
+      final (title, description, priority, category) = initialData[i];
 
       _tasks.add(
         Task(
           id: 'task_$i',
           title: title,
+          description: description,
           isCompleted: i % 2 == 0,
           priority: priority,
+          category: category,
         ),
       );
     }
@@ -40,14 +70,21 @@ class InMemoryTaskRepository implements TaskRepository {
   }
 
   @override
-  Future<Result<Task>> addTask(String title, TaskPriority priority) async {
+  Future<Result<Task>> addTask({
+    required String title,
+    String? description,
+    required TaskPriority priority,
+    required TaskCategory category,
+  }) async {
     await Future<void>.delayed(const Duration(milliseconds: 300));
 
     final task = Task(
       id: DateTime.now().microsecondsSinceEpoch.toString(),
       title: title,
+      description: description,
       isCompleted: false,
       priority: priority,
+      category: category,
     );
 
     _tasks.add(task);

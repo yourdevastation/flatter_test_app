@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test_app/features/tasks/data/repositories/in_memory_task_repository.dart';
 import 'package:flutter_test_app/features/tasks/domain/entities/task_filter.dart';
+import 'package:flutter_test_app/features/tasks/presentation/mappers/task_card_mapper.dart';
 import 'package:flutter_test_app/features/tasks/presentation/view_models/task_list_view_model.dart';
 import 'package:flutter_test_app/features/tasks/presentation/widgets/add_task_dialog.dart';
+import 'package:flutter_test_app/features/tasks/presentation/widgets/priority_chip.dart';
 import 'package:flutter_test_app/features/tasks/presentation/widgets/stats_card.dart';
-import 'package:flutter_test_app/features/tasks/presentation/widgets/task_tile.dart';
+import 'package:flutter_test_app/features/tasks/presentation/widgets/task_card.dart';
 
 class TaskListScreen extends StatefulWidget {
   const TaskListScreen({super.key});
@@ -73,9 +75,15 @@ class _TaskListScreenState extends State<TaskListScreen> {
                         itemBuilder: (context, index) {
                           final task = tasks[index];
 
-                          return TaskTile(
-                            task: task,
-                            onToggle: () => _viewModel.toggleTask(task),
+                          return TaskCard.fromData(
+                            task.toCardData(),
+                            key: ValueKey(task.id),
+                            leading: Checkbox(
+                              value: task.isCompleted,
+                              onChanged: (_) => _viewModel.toggleTask(task),
+                            ),
+                            trailing: PriorityChip(priority: task.priority),
+                            onTap: () => _viewModel.toggleTask(task),
                           );
                         },
                       ),
@@ -92,13 +100,24 @@ class _TaskListScreenState extends State<TaskListScreen> {
       context: context,
       builder: (dialogContext) {
         return AddTaskDialog(
-          onAdd: (title, priority) async {
-            await _viewModel.addTask(title, priority);
+          onAdd:
+              ({
+                required title,
+                description,
+                required priority,
+                required category,
+              }) async {
+                await _viewModel.addTask(
+                  title: title,
+                  description: description,
+                  priority: priority,
+                  category: category,
+                );
 
-            if (dialogContext.mounted) {
-              Navigator.of(dialogContext).pop();
-            }
-          },
+                if (dialogContext.mounted) {
+                  Navigator.of(dialogContext).pop();
+                }
+              },
         );
       },
     );

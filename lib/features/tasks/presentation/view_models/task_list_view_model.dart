@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test_app/features/tasks/domain/entities/task.dart';
+import 'package:flutter_test_app/features/tasks/domain/entities/task_category.dart';
 import 'package:flutter_test_app/features/tasks/domain/entities/task_filter.dart';
 import 'package:flutter_test_app/features/tasks/domain/entities/task_priority.dart';
 import 'package:flutter_test_app/features/tasks/domain/entities/task_stats.dart';
@@ -42,8 +43,18 @@ class TaskListViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> addTask(String title, TaskPriority priority) async {
-    final result = await _repository.addTask(title, priority);
+  Future<void> addTask({
+    required String title,
+    String? description,
+    required TaskPriority priority,
+    required TaskCategory category,
+  }) async {
+    final result = await _repository.addTask(
+      title: title,
+      description: description,
+      priority: priority,
+      category: category,
+    );
 
     if (result.isSuccess && result.data != null) {
       _allTasks = [..._allTasks, result.data!];
