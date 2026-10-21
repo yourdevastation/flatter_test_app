@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
-String taskImageHeroTag(String taskId) => 'task-image-$taskId';
+String cardImageHeroTag(String id) => 'card-image-$id';
 
-class TaskImage extends StatelessWidget {
-  const TaskImage({
+class CardImage extends StatelessWidget {
+  const CardImage({
     super.key,
     required this.url,
     required this.heroTag,

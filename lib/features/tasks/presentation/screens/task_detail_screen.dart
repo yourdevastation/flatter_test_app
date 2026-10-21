@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test_app/core/extensions/date_time_extension.dart';
 import 'package:flutter_test_app/core/extensions/task_category_extension.dart';
+import 'package:flutter_test_app/core/widgets/app_bar_circle.dart';
+import 'package:flutter_test_app/core/widgets/card_image.dart';
+import 'package:flutter_test_app/core/widgets/content_card.dart';
+import 'package:flutter_test_app/core/widgets/info_section.dart';
+import 'package:flutter_test_app/core/widgets/like_icon.dart';
 import 'package:flutter_test_app/features/tasks/domain/entities/task.dart';
 import 'package:flutter_test_app/features/tasks/presentation/view_models/task_list_view_model.dart';
-import 'package:flutter_test_app/features/tasks/presentation/widgets/like_icon.dart';
 import 'package:flutter_test_app/features/tasks/presentation/widgets/priority_chip.dart';
-import 'package:flutter_test_app/features/tasks/presentation/widgets/task_card.dart';
-import 'package:flutter_test_app/features/tasks/presentation/widgets/task_image.dart';
 
 class TaskDetailScreen extends StatelessWidget {
   const TaskDetailScreen({
@@ -43,9 +45,9 @@ class TaskDetailScreen extends StatelessWidget {
                 expandedHeight: 300,
                 pinned: true,
                 stretch: true,
-                leading: const _AppBarCircle(child: BackButton()),
+                leading: const AppBarCircle(child: BackButton()),
                 actions: [
-                  _AppBarCircle(
+                  AppBarCircle(
                     child: IconButton(
                       tooltip: task.isFavorite
                           ? 'Убрать из избранного'
@@ -61,9 +63,9 @@ class TaskDetailScreen extends StatelessWidget {
                     StretchMode.zoomBackground,
                     StretchMode.fadeTitle,
                   ],
-                  background: TaskImage(
+                  background: CardImage(
                     url: task.category.imageUrl,
-                    heroTag: taskImageHeroTag(task.id),
+                    heroTag: cardImageHeroTag(task.id),
                   ),
                 ),
               ),
@@ -82,26 +84,6 @@ class TaskDetailScreen extends StatelessWidget {
           ),
         );
       },
-    );
-  }
-}
-
-class _AppBarCircle extends StatelessWidget {
-  const _AppBarCircle({required this.child});
-
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(6),
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.85),
-          shape: BoxShape.circle,
-        ),
-        child: child,
-      ),
     );
   }
 }
@@ -153,76 +135,28 @@ class _TaskDetails extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 24),
-          DecoratedBox(
-            decoration: BoxDecoration(
-              color: colorScheme.surfaceContainerLow,
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Column(
-              children: [
-                _InfoRow(
-                  icon: Icons.event_outlined,
-                  label: 'Создана',
-                  value:
-                      '${task.createdAt.toShortDate()} · '
-                      '${task.createdAt.toRelativeDay()}',
-                ),
-                const Divider(height: 1, indent: 56),
-                _InfoRow(
-                  icon: task.isCompleted
-                      ? Icons.check_circle_outline
-                      : Icons.timelapse,
-                  label: 'Статус',
-                  value: task.isCompleted ? 'Выполнена' : 'В работе',
-                ),
-                const Divider(height: 1, indent: 56),
-                _InfoRow(
-                  icon: task.isFavorite
-                      ? Icons.favorite
-                      : Icons.favorite_border,
-                  label: 'Избранное',
-                  value: task.isFavorite ? 'Да' : 'Нет',
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _InfoRow extends StatelessWidget {
-  const _InfoRow({
-    required this.icon,
-    required this.label,
-    required this.value,
-  });
-
-  final IconData icon;
-  final String label;
-  final String value;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      child: Row(
-        children: [
-          Icon(icon, color: theme.colorScheme.primary),
-          const SizedBox(width: 16),
-          Text(label, style: theme.textTheme.bodyMedium),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Text(
-              value,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                fontWeight: FontWeight.w600,
+          InfoSection(
+            rows: [
+              InfoRow(
+                icon: Icons.event_outlined,
+                label: 'Создана',
+                value:
+                    '${task.createdAt.toShortDate()} · '
+                    '${task.createdAt.toRelativeDay()}',
               ),
-              textAlign: TextAlign.end,
-            ),
+              InfoRow(
+                icon: task.isCompleted
+                    ? Icons.check_circle_outline
+                    : Icons.timelapse,
+                label: 'Статус',
+                value: task.isCompleted ? 'Выполнена' : 'В работе',
+              ),
+              InfoRow(
+                icon: task.isFavorite ? Icons.favorite : Icons.favorite_border,
+                label: 'Избранное',
+                value: task.isFavorite ? 'Да' : 'Нет',
+              ),
+            ],
           ),
         ],
       ),

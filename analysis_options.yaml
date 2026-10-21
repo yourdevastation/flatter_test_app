@@ -7,6 +7,7 @@ analyzer:
     - web/**
     - windows/**
     - linux/**
+    - "**/*.g.dart"
 
 linter:
   rules:

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test_app/core/theme/app_theme.dart';
-import 'package:flutter_test_app/features/tasks/presentation/screens/task_list_screen.dart';
+import 'package:flutter_test_app/features/home/home_screen.dart';
 
 class MiniTasksApp extends StatelessWidget {
   const MiniTasksApp({super.key});
@@ -13,7 +13,7 @@ class MiniTasksApp extends StatelessWidget {
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
       themeMode: ThemeMode.system,
-      home: const TaskListScreen(),
+      home: const HomeScreen(),
     );
   }
 }

@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_test_app/features/tasks/presentation/models/task_card_data.dart';
-import 'package:flutter_test_app/features/tasks/presentation/widgets/like_icon.dart';
-import 'package:flutter_test_app/features/tasks/presentation/widgets/task_image.dart';
+import 'package:flutter_test_app/core/widgets/content_card_data.dart';
+import 'package:flutter_test_app/core/widgets/like_icon.dart';
+import 'package:flutter_test_app/core/widgets/card_image.dart';
 
 typedef OnLikeCallback = void Function(String id, String title, bool isLiked);
 
-class TaskCard extends StatefulWidget {
-  const TaskCard.fromData(
+class ContentCard extends StatefulWidget {
+  const ContentCard.fromData(
     this.data, {
     super.key,
     this.leading,
@@ -15,17 +15,17 @@ class TaskCard extends StatefulWidget {
     this.onLike,
   });
 
-  final TaskCardData data;
+  final ContentCardData data;
   final Widget? leading;
   final Widget? trailing;
   final VoidCallback? onTap;
   final OnLikeCallback? onLike;
 
   @override
-  State<TaskCard> createState() => _TaskCardState();
+  State<ContentCard> createState() => _ContentCardState();
 }
 
-class _TaskCardState extends State<TaskCard> {
+class _ContentCardState extends State<ContentCard> {
   static const double _radius = 16;
   static const double _imageHeight = 160;
   static const double _minHeight = 272;
@@ -36,7 +36,7 @@ class _TaskCardState extends State<TaskCard> {
   bool _showLikeBurst = false;
 
   @override
-  void didUpdateWidget(covariant TaskCard oldWidget) {
+  void didUpdateWidget(covariant ContentCard oldWidget) {
     super.didUpdateWidget(oldWidget);
 
     // Лайк могли поменять снаружи: отменой из снекбара или на экране деталей.
@@ -144,15 +144,15 @@ class _TaskCardState extends State<TaskCard> {
       child: SizedBox(
         height: _imageHeight,
         child: GestureDetector(
-          onDoubleTap: _likeByDoubleTap,
+          onDoubleTap: widget.onLike == null ? null : _likeByDoubleTap,
           // Placeholder (если картинка не загрузилась) не ловит касания,
           // поэтому двойной тап принимаем по всей области картинки.
           behavior: HitTestBehavior.opaque,
           child: Stack(
             children: [
-              TaskImage(
+              CardImage(
                 url: data.imageUrl,
-                heroTag: taskImageHeroTag(data.id),
+                heroTag: cardImageHeroTag(data.id),
                 isDimmed: data.isCompleted,
               ),
               Align(
@@ -177,19 +177,20 @@ class _TaskCardState extends State<TaskCard> {
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           ?widget.trailing,
-          Expanded(
-            child: Align(
-              alignment: Alignment.bottomRight,
-              child: GestureDetector(
-                onTap: _toggleLike,
-                behavior: HitTestBehavior.opaque,
-                child: Padding(
-                  padding: const EdgeInsets.all(8),
-                  child: LikeIcon(isLiked: _isLiked),
+          if (widget.onLike != null)
+            Expanded(
+              child: Align(
+                alignment: Alignment.bottomRight,
+                child: GestureDetector(
+                  onTap: _toggleLike,
+                  behavior: HitTestBehavior.opaque,
+                  child: Padding(
+                    padding: const EdgeInsets.all(8),
+                    child: LikeIcon(isLiked: _isLiked),
+                  ),
                 ),
               ),
             ),
-          ),
         ],
       ),
     );
@@ -263,7 +264,7 @@ class _LikeBurst extends StatelessWidget {
 class _CardContent extends StatelessWidget {
   const _CardContent({required this.data});
 
-  final TaskCardData data;
+  final ContentCardData data;
 
   @override
   Widget build(BuildContext context) {

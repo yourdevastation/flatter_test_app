@@ -4,4 +4,7 @@
          to allow setting breakpoints, to provide hot reload, etc.
     -->
     <uses-permission android:name="android.permission.INTERNET"/>
+    <!-- Локальный бэкенд работает по http без TLS, Android по умолчанию
+         такие запросы блокирует. Разрешаем только в debug-сборке. -->
+    <application android:usesCleartextTraffic="true"/>
 </manifest>

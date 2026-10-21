@@ -1,6 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_test_app/features/tasks/data/repositories/in_memory_task_repository.dart';
+import 'package:flutter_test_app/core/extensions/snack_bar_extension.dart';
+import 'package:flutter_test_app/core/widgets/content_card.dart';
+import 'package:flutter_test_app/core/widgets/status_view.dart';
 import 'package:flutter_test_app/features/tasks/domain/entities/task.dart';
 import 'package:flutter_test_app/features/tasks/domain/entities/task_filter.dart';
 import 'package:flutter_test_app/features/tasks/presentation/mappers/task_card_mapper.dart';
@@ -9,23 +11,22 @@ import 'package:flutter_test_app/features/tasks/presentation/view_models/task_li
 import 'package:flutter_test_app/features/tasks/presentation/widgets/add_task_dialog.dart';
 import 'package:flutter_test_app/features/tasks/presentation/widgets/priority_chip.dart';
 import 'package:flutter_test_app/features/tasks/presentation/widgets/stats_card.dart';
-import 'package:flutter_test_app/features/tasks/presentation/widgets/task_card.dart';
 
 class TaskListScreen extends StatefulWidget {
-  const TaskListScreen({super.key});
+  const TaskListScreen({super.key, required this.viewModel});
+
+  final TaskListViewModel viewModel;
 
   @override
   State<TaskListScreen> createState() => _TaskListScreenState();
 }
 
 class _TaskListScreenState extends State<TaskListScreen> {
-  late final TaskListViewModel _viewModel;
+  TaskListViewModel get _viewModel => widget.viewModel;
 
   @override
   void initState() {
     super.initState();
-    _viewModel = TaskListViewModel(InMemoryTaskRepository());
-    _viewModel.loadTasks();
 
     // В initState ещё нельзя обращаться к ScaffoldMessenger через context:
     // дерево не построено. Поэтому откладываем показ до конца первого кадра.
@@ -35,12 +36,6 @@ class _TaskListScreenState extends State<TaskListScreen> {
         icon: Icons.touch_app_outlined,
       );
     });
-  }
-
-  @override
-  void dispose() {
-    _viewModel.dispose();
-    super.dispose();
   }
 
   @override
@@ -60,8 +55,10 @@ class _TaskListScreenState extends State<TaskListScreen> {
           }
 
           if (_viewModel.error != null) {
-            return _ErrorState(
-              message: _viewModel.error!,
+            return StatusView(
+              icon: Icons.error_outline,
+              title: 'Не удалось загрузить задачи',
+              message: _viewModel.error,
               onRetry: () => _viewModel.loadTasks(),
             );
           }
@@ -80,14 +77,17 @@ class _TaskListScreenState extends State<TaskListScreen> {
               ),
               Expanded(
                 child: tasks.isEmpty
-                    ? const _EmptyState()
+                    ? const StatusView(
+                        icon: Icons.check_circle_outline,
+                        title: 'Задач пока нет',
+                      )
                     : ListView.builder(
                         padding: const EdgeInsets.fromLTRB(16, 8, 16, 96),
                         itemCount: tasks.length,
                         itemBuilder: (context, index) {
                           final task = tasks[index];
 
-                          return TaskCard.fromData(
+                          return ContentCard.fromData(
                             task.toCardData(),
                             key: ValueKey(task.id),
                             leading: Checkbox(
@@ -128,23 +128,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
     required IconData icon,
     SnackBarAction? action,
   }) {
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(
-        SnackBar(
-          behavior: SnackBarBehavior.floating,
-          // С action снекбар по умолчанию не скрывается сам.
-          persist: false,
-          action: action,
-          content: Row(
-            children: [
-              Icon(icon, color: Theme.of(context).colorScheme.onInverseSurface),
-              const SizedBox(width: 12),
-              Expanded(child: Text(message)),
-            ],
-          ),
-        ),
-      );
+    context.showAppSnackBar(message: message, icon: icon, action: action);
   }
 
   void _openDetails(Task task) {
@@ -217,53 +201,6 @@ class _FilterChips extends StatelessWidget {
             );
           }).toList(),
         ),
-      ),
-    );
-  }
-}
-
-class _EmptyState extends StatelessWidget {
-  const _EmptyState();
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.check_circle_outline,
-            size: 64,
-            color: theme.colorScheme.outline,
-          ),
-          const SizedBox(height: 16),
-          Text('Задач пока нет', style: theme.textTheme.titleMedium),
-        ],
-      ),
-    );
-  }
-}
-
-class _ErrorState extends StatelessWidget {
-  const _ErrorState({required this.message, required this.onRetry});
-
-  final String message;
-  final VoidCallback onRetry;
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(Icons.error_outline, size: 48),
-          const SizedBox(height: 16),
-          Text(message),
-          const SizedBox(height: 16),
-          FilledButton(onPressed: onRetry, child: const Text('Повторить')),
-        ],
       ),
     );
   }

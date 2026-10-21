@@ -1,6 +1,6 @@
 import 'package:flutter/widgets.dart';
 
-class TaskCardData {
+class ContentCardData {
   final String id;
   final String title;
   final String imageUrl;
@@ -10,7 +10,7 @@ class TaskCardData {
   final bool isCompleted;
   final bool isLiked;
 
-  const TaskCardData({
+  const ContentCardData({
     required this.id,
     required this.title,
     required this.imageUrl,
