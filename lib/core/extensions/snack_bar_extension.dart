@@ -15,6 +15,10 @@ extension SnackBarExtension on BuildContext {
           persist: false,
           action: action,
           content: Row(
+            // Тег Hero у снекбара строится из toString() содержимого, а у
+            // нас это всегда «Row(...)». Снекбары двух вкладок получали один
+            // тег, и переход на другой экран падал. Ключ делает тег уникальным.
+            key: UniqueKey(),
             children: [
               Icon(icon, color: Theme.of(this).colorScheme.onInverseSurface),
               const SizedBox(width: 12),

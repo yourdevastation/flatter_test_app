@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_test_app/core/l10n/l10n.dart';
 import 'package:flutter_test_app/core/extensions/date_time_extension.dart';
 import 'package:flutter_test_app/core/extensions/task_category_extension.dart';
 import 'package:flutter_test_app/core/widgets/app_bar_circle.dart';
@@ -34,7 +35,7 @@ class TaskDetailScreen extends StatelessWidget {
         if (task == null) {
           return Scaffold(
             appBar: AppBar(),
-            body: const Center(child: Text('Задача не найдена')),
+            body: Center(child: Text(context.l10n.taskNotFound)),
           );
         }
 
@@ -50,8 +51,8 @@ class TaskDetailScreen extends StatelessWidget {
                   AppBarCircle(
                     child: IconButton(
                       tooltip: task.isFavorite
-                          ? 'Убрать из избранного'
-                          : 'В избранное',
+                          ? context.l10n.removeFromFavorites
+                          : context.l10n.addToFavorites,
                       onPressed: () =>
                           onLike(task.id, task.title, !task.isFavorite),
                       icon: LikeIcon(isLiked: task.isFavorite),
@@ -78,7 +79,9 @@ class TaskDetailScreen extends StatelessWidget {
               onPressed: () => viewModel.toggleTask(task),
               icon: Icon(task.isCompleted ? Icons.replay : Icons.check),
               label: Text(
-                task.isCompleted ? 'Вернуть в работу' : 'Отметить выполненной',
+                task.isCompleted
+                    ? context.l10n.markAsActive
+                    : context.l10n.markAsDone,
               ),
             ),
           ),
@@ -95,6 +98,7 @@ class _TaskDetails extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final description = task.description;
@@ -110,7 +114,7 @@ class _TaskDetails extends StatelessWidget {
             children: [
               Chip(
                 avatar: Icon(task.category.icon, size: 18),
-                label: Text(task.category.label),
+                label: Text(task.category.label(l10n)),
                 side: BorderSide.none,
               ),
               PriorityChip(priority: task.priority),
@@ -125,10 +129,10 @@ class _TaskDetails extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 20),
-          Text('Описание', style: theme.textTheme.titleSmall),
+          Text(l10n.descriptionTitle, style: theme.textTheme.titleSmall),
           const SizedBox(height: 6),
           Text(
-            description ?? 'Описание не добавлено',
+            description ?? l10n.noDescription,
             style: theme.textTheme.bodyLarge?.copyWith(
               color: description == null ? colorScheme.outline : null,
               fontStyle: description == null ? FontStyle.italic : null,
@@ -139,22 +143,22 @@ class _TaskDetails extends StatelessWidget {
             rows: [
               InfoRow(
                 icon: Icons.event_outlined,
-                label: 'Создана',
+                label: l10n.createdLabel,
                 value:
-                    '${task.createdAt.toShortDate()} · '
-                    '${task.createdAt.toRelativeDay()}',
+                    '${task.createdAt.toShortDate(l10n)} · '
+                    '${task.createdAt.toRelativeDay(l10n)}',
               ),
               InfoRow(
                 icon: task.isCompleted
                     ? Icons.check_circle_outline
                     : Icons.timelapse,
-                label: 'Статус',
-                value: task.isCompleted ? 'Выполнена' : 'В работе',
+                label: l10n.statusLabel,
+                value: task.isCompleted ? l10n.statusDone : l10n.statusActive,
               ),
               InfoRow(
                 icon: task.isFavorite ? Icons.favorite : Icons.favorite_border,
-                label: 'Избранное',
-                value: task.isFavorite ? 'Да' : 'Нет',
+                label: l10n.favoriteLabel,
+                value: task.isFavorite ? l10n.yes : l10n.no,
               ),
             ],
           ),

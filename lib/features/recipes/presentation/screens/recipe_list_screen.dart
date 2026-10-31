@@ -4,16 +4,20 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test_app/core/extensions/snack_bar_extension.dart';
+import 'package:flutter_test_app/core/l10n/l10n.dart';
 import 'package:flutter_test_app/core/utils/debounce.dart';
 import 'package:flutter_test_app/core/widgets/content_card.dart';
 import 'package:flutter_test_app/core/widgets/status_view.dart';
 import 'package:flutter_test_app/features/recipes/domain/entities/recipe.dart';
+import 'package:flutter_test_app/features/recipes/presentation/bloc/like_bloc.dart';
 import 'package:flutter_test_app/features/recipes/presentation/bloc/recipe_list_bloc.dart';
 import 'package:flutter_test_app/features/recipes/presentation/bloc/recipe_list_event.dart';
 import 'package:flutter_test_app/features/recipes/presentation/bloc/recipe_list_state.dart';
 import 'package:flutter_test_app/features/recipes/presentation/mappers/recipe_card_mapper.dart';
+import 'package:flutter_test_app/features/recipes/presentation/recipe_like_actions.dart';
 import 'package:flutter_test_app/features/recipes/presentation/screens/recipe_detail_screen.dart';
 import 'package:flutter_test_app/features/recipes/presentation/widgets/cooking_time_chip.dart';
+import 'package:flutter_test_app/features/settings/presentation/widgets/locale_switch_button.dart';
 
 class RecipeListScreen extends StatefulWidget {
   const RecipeListScreen({super.key, required this.onAddToTasks});
@@ -131,8 +135,13 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Рецепты')),
+      appBar: AppBar(
+        title: Text(l10n.tabRecipes),
+        actions: const [LocaleSwitchButton()],
+      ),
       floatingActionButton: ValueListenableBuilder<bool>(
         valueListenable: _showScrollToTop,
         builder: (context, isVisible, child) => AnimatedScale(
@@ -141,7 +150,10 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
           child: child,
         ),
         child: FloatingActionButton.small(
-          tooltip: 'Наверх',
+          // Обе вкладки в одном маршруте: у двух FAB с тегом по умолчанию
+          // переход на экран деталей падает (два Hero с одним тегом).
+          heroTag: null,
+          tooltip: l10n.scrollToTop,
           onPressed: _scrollToTop,
           child: const Icon(Icons.arrow_upward),
         ),
@@ -152,7 +164,7 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
             padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
             child: CupertinoSearchTextField(
               controller: _searchController,
-              placeholder: 'Поиск по названию',
+              placeholder: l10n.recipesSearchHint,
               onChanged: _onSearchChanged,
               onSubmitted: _onSearchSubmitted,
             ),
@@ -185,11 +197,16 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
 
     // Когда список пуст, ошибку показывает StatusView, снекбар не нужен.
     if (error != null && state.recipes.isNotEmpty) {
-      context.showAppSnackBar(message: error, icon: Icons.cloud_off);
+      context.showAppSnackBar(
+        message: error.message(context.l10n),
+        icon: Icons.cloud_off,
+      );
     }
   }
 
   Widget _buildBody(RecipeListState state) {
+    final l10n = context.l10n;
+
     if (state.recipes.isEmpty) {
       if (state.isLoading) {
         return const Center(child: CircularProgressIndicator());
@@ -200,16 +217,16 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
       if (error != null) {
         return StatusView(
           icon: Icons.cloud_off,
-          title: 'Не удалось загрузить рецепты',
-          message: error,
+          title: l10n.recipesLoadError,
+          message: error.message(l10n),
           onRetry: _reload,
         );
       }
 
-      return const StatusView(
+      return StatusView(
         icon: Icons.search_off,
-        title: 'Ничего не найдено',
-        message: 'Попробуй изменить запрос',
+        title: l10n.recipesNotFound,
+        message: l10n.recipesNotFoundHint,
       );
     }
 
@@ -238,14 +255,10 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
                 }
 
                 final recipe = state.recipes[index];
-                final cookingTime = recipe.cookingTimeLabel;
 
-                return ContentCard.fromData(
-                  recipe.toCardData(),
+                return _RecipeListItem(
                   key: ValueKey(recipe.id),
-                  trailing: cookingTime == null
-                      ? null
-                      : CookingTimeChip(label: cookingTime),
+                  recipe: recipe,
                   onTap: () => _openDetails(recipe),
                 );
               },
@@ -253,6 +266,34 @@ class _RecipeListScreenState extends State<RecipeListScreen> {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _RecipeListItem extends StatelessWidget {
+  const _RecipeListItem({super.key, required this.recipe, required this.onTap});
+
+  final Recipe recipe;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    // В лекции весь список обёрнут в BlocBuilder<LikeBloc>, и лайк одного
+    // рецепта перерисовывает все карточки. select подписывает карточку
+    // только на её собственный лайк.
+    final isLiked = context.select<LikeBloc, bool>(
+      (bloc) => bloc.state.isLiked(recipe.id),
+    );
+    final cookingTime = recipe.cookingTimeLabel(context.l10n);
+
+    return ContentCard.fromData(
+      recipe.toCardData(isLiked: isLiked),
+      trailing: cookingTime == null
+          ? null
+          : CookingTimeChip(label: cookingTime),
+      onTap: onTap,
+      onLike: (_, _, isLiked) =>
+          setRecipeLiked(context, recipe, isLiked: isLiked),
     );
   }
 }
@@ -280,7 +321,7 @@ class _ListFooter extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.all(16),
       child: Text(
-        'Это все рецепты',
+        context.l10n.recipesEnd,
         textAlign: TextAlign.center,
         style: theme.textTheme.bodySmall?.copyWith(
           color: theme.colorScheme.outline,

@@ -1,5 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_test_app/features/settings/presentation/widgets/locale_switch_button.dart';
+import 'package:flutter_test_app/core/extensions/task_filter_extension.dart';
+import 'package:flutter_test_app/core/l10n/l10n.dart';
 import 'package:flutter_test_app/core/extensions/snack_bar_extension.dart';
 import 'package:flutter_test_app/core/widgets/content_card.dart';
 import 'package:flutter_test_app/core/widgets/status_view.dart';
@@ -32,7 +35,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
     // дерево не построено. Поэтому откладываем показ до конца первого кадра.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _showSnackBar(
-        message: 'Нажми на карточку, чтобы открыть подробности',
+        message: context.l10n.tasksHint,
         icon: Icons.touch_app_outlined,
       );
     });
@@ -40,12 +43,18 @@ class _TaskListScreenState extends State<TaskListScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Мини-задачи')),
+      appBar: AppBar(
+        title: Text(l10n.appTitle),
+        actions: const [LocaleSwitchButton()],
+      ),
       floatingActionButton: FloatingActionButton.extended(
+        heroTag: null,
         onPressed: () => _showAddTaskDialog(context),
         icon: const Icon(Icons.add),
-        label: const Text('Добавить'),
+        label: Text(l10n.add),
       ),
       body: ListenableBuilder(
         listenable: _viewModel,
@@ -54,11 +63,13 @@ class _TaskListScreenState extends State<TaskListScreen> {
             return const Center(child: CircularProgressIndicator());
           }
 
-          if (_viewModel.error != null) {
+          final error = _viewModel.error;
+
+          if (error != null) {
             return StatusView(
               icon: Icons.error_outline,
-              title: 'Не удалось загрузить задачи',
-              message: _viewModel.error,
+              title: l10n.tasksLoadError,
+              message: error.message(l10n),
               onRetry: () => _viewModel.loadTasks(),
             );
           }
@@ -77,9 +88,9 @@ class _TaskListScreenState extends State<TaskListScreen> {
               ),
               Expanded(
                 child: tasks.isEmpty
-                    ? const StatusView(
+                    ? StatusView(
                         icon: Icons.check_circle_outline,
-                        title: 'Задач пока нет',
+                        title: l10n.tasksEmpty,
                       )
                     : ListView.builder(
                         padding: const EdgeInsets.fromLTRB(16, 8, 16, 96),
@@ -88,7 +99,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
                           final task = tasks[index];
 
                           return ContentCard.fromData(
-                            task.toCardData(),
+                            task.toCardData(l10n),
                             key: ValueKey(task.id),
                             leading: Checkbox(
                               value: task.isCompleted,
@@ -96,7 +107,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
                             ),
                             trailing: PriorityChip(priority: task.priority),
                             onTap: () => _openDetails(task),
-                            onLike: _onLike,
+                            onLike: _likeHandler(context),
                           );
                         },
                       ),
@@ -108,19 +119,24 @@ class _TaskListScreenState extends State<TaskListScreen> {
     );
   }
 
-  void _onLike(String id, String title, bool isLiked) {
-    _viewModel.setFavorite(id, isFavorite: isLiked);
+  /// Снекбар показываем там, откуда лайкнули: со списка — во вкладке,
+  /// с экрана деталей — на нём самом ([snackBarContext] — контекст экрана).
+  OnLikeCallback _likeHandler(BuildContext snackBarContext) {
+    return (id, title, isLiked) {
+      final l10n = snackBarContext.l10n;
+      _viewModel.setFavorite(id, isFavorite: isLiked);
 
-    _showSnackBar(
-      message: isLiked
-          ? '«$title» добавлена в избранное'
-          : '«$title» убрана из избранного',
-      icon: isLiked ? Icons.favorite : Icons.heart_broken_outlined,
-      action: SnackBarAction(
-        label: 'Отменить',
-        onPressed: () => _viewModel.setFavorite(id, isFavorite: !isLiked),
-      ),
-    );
+      snackBarContext.showAppSnackBar(
+        message: isLiked
+            ? l10n.taskAddedToFavorites(title)
+            : l10n.taskRemovedFromFavorites(title),
+        icon: isLiked ? Icons.favorite : Icons.heart_broken_outlined,
+        action: SnackBarAction(
+          label: l10n.undo,
+          onPressed: () => _viewModel.setFavorite(id, isFavorite: !isLiked),
+        ),
+      );
+    };
   }
 
   void _showSnackBar({
@@ -134,10 +150,10 @@ class _TaskListScreenState extends State<TaskListScreen> {
   void _openDetails(Task task) {
     Navigator.of(context).push(
       CupertinoPageRoute<void>(
-        builder: (context) => TaskDetailScreen(
+        builder: (routeContext) => TaskDetailScreen(
           taskId: task.id,
           viewModel: _viewModel,
-          onLike: _onLike,
+          onLike: _likeHandler(routeContext),
         ),
       ),
     );
@@ -194,7 +210,7 @@ class _FilterChips extends StatelessWidget {
             return Padding(
               padding: const EdgeInsets.only(right: 8.0),
               child: FilterChip(
-                label: Text(filter.label),
+                label: Text(filter.label(context.l10n)),
                 selected: isSelected,
                 onSelected: (_) => onFilterSelected(filter),
               ),

@@ -1,5 +1,6 @@
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:equatable/equatable.dart';
+import 'package:flutter_test_app/core/models/app_failure.dart';
 import 'package:flutter_test_app/features/recipes/domain/entities/recipe.dart';
 
 part 'recipe_list_state.g.dart';
@@ -21,7 +22,7 @@ class RecipeListState extends Equatable {
   final bool isLoadingMore;
 
   /// Ошибка последнего запроса.
-  final String? error;
+  final AppFailure? error;
 
   const RecipeListState({
     this.recipes = const [],

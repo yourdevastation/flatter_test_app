@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_test_app/core/l10n/l10n.dart';
 import 'package:flutter_test_app/core/widgets/content_card_data.dart';
 import 'package:flutter_test_app/features/recipes/domain/entities/recipe.dart';
 
@@ -12,38 +13,39 @@ extension RecipeCardMapper on Recipe {
 
   String get displayImageUrl => imageUrl ?? _placeholderImageUrl;
 
-  String? get cookingTimeLabel {
+  String? cookingTimeLabel(AppLocale l10n) {
     return switch ((cookingTimeFrom, cookingTimeTo)) {
       (final int from, final int to) when from < 60 && to < 60 && from != to =>
-        '$from–$to мин',
+        l10n.minutesRangeShort(from, to),
       (final int from, final int to)
           when from % 60 == 0 && to % 60 == 0 && from != to =>
-        '${from ~/ 60}–${to ~/ 60} ч',
+        l10n.hoursRangeShort(from ~/ 60, to ~/ 60),
       (final int from, final int to) when from != to =>
-        '${_formatMinutes(from)} – ${_formatMinutes(to)}',
-      (final int from, _) => _formatMinutes(from),
-      (_, final int to) => _formatMinutes(to),
+        '${_formatMinutes(from, l10n)} – ${_formatMinutes(to, l10n)}',
+      (final int from, _) => _formatMinutes(from, l10n),
+      (_, final int to) => _formatMinutes(to, l10n),
       _ => null,
     };
   }
 
-  ContentCardData toCardData() => ContentCardData(
+  ContentCardData toCardData({required bool isLiked}) => ContentCardData(
     id: cardId,
     title: name,
     imageUrl: displayImageUrl,
     icon: Icons.restaurant_menu,
     caption: categoryName,
     description: description,
+    isLiked: isLiked,
   );
 }
 
-String _formatMinutes(int minutes) {
+String _formatMinutes(int minutes, AppLocale l10n) {
   final hours = minutes ~/ 60;
   final rest = minutes % 60;
 
   return switch ((hours, rest)) {
-    (0, _) => '$rest мин',
-    (_, 0) => '$hours ч',
-    _ => '$hours ч $rest мин',
+    (0, _) => l10n.minutesShort(rest),
+    (_, 0) => l10n.hoursShort(hours),
+    _ => l10n.hoursMinutesShort(hours, rest),
   };
 }

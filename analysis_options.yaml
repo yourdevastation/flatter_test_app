@@ -8,6 +8,7 @@ analyzer:
     - windows/**
     - linux/**
     - "**/*.g.dart"
+    - lib/core/l10n/generated/**
 
 linter:
   rules:

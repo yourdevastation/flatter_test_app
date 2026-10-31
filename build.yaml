@@ -1,0 +1,9 @@
+targets:
+  $default:
+    builders:
+      drift_dev:
+        options:
+          # По умолчанию drift хранит DateTime в секундах, и задачи,
+          # созданные в одну секунду, сортировались бы как попало.
+          # Текст ISO-8601 сохраняет время с точностью до микросекунд.
+          store_date_time_values_as_text: true

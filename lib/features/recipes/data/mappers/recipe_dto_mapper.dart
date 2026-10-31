@@ -10,7 +10,7 @@ extension RecipeDtoMapper on RecipeDto {
   /// вида "./images/borsch.png".
   Recipe toDomain({required Uri baseUri}) => Recipe(
     id: id ?? 0,
-    name: name ?? 'Без названия',
+    name: name ?? '',
     description: description ?? '',
     imageUrl: _resolveImageUrl(baseUri),
     cookingTimeFrom: cookingTimeFrom,

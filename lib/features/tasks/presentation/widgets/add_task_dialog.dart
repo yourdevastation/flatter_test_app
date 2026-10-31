@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_test_app/core/extensions/task_priority_extension.dart';
+import 'package:flutter_test_app/core/l10n/l10n.dart';
 import 'package:flutter_test_app/core/extensions/string_extension.dart';
 import 'package:flutter_test_app/core/extensions/task_category_extension.dart';
 import 'package:flutter_test_app/features/tasks/domain/entities/task_category.dart';
@@ -40,7 +42,7 @@ class _AddTaskDialogState extends State<AddTaskDialog> {
 
     if (title.isBlank) {
       setState(() {
-        _errorText = 'Введите название задачи';
+        _errorText = context.l10n.taskTitleRequired;
       });
       return;
     }
@@ -60,10 +62,11 @@ class _AddTaskDialogState extends State<AddTaskDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final labelStyle = Theme.of(context).textTheme.labelLarge;
 
     return AlertDialog(
-      title: const Text('Новая задача'),
+      title: Text(l10n.newTaskTitle),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -73,8 +76,8 @@ class _AddTaskDialogState extends State<AddTaskDialog> {
               controller: _titleController,
               autofocus: true,
               decoration: InputDecoration(
-                labelText: 'Название',
-                hintText: 'Введите название задачи',
+                labelText: l10n.taskTitleLabel,
+                hintText: l10n.taskTitleHint,
                 errorText: _errorText,
                 border: const OutlineInputBorder(),
               ),
@@ -83,16 +86,16 @@ class _AddTaskDialogState extends State<AddTaskDialog> {
             const SizedBox(height: 12),
             TextField(
               controller: _descriptionController,
-              decoration: const InputDecoration(
-                labelText: 'Описание (необязательно)',
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                labelText: l10n.taskDescriptionLabel,
+                border: const OutlineInputBorder(),
               ),
               maxLines: 2,
               textInputAction: TextInputAction.done,
               onSubmitted: (_) => _submit(),
             ),
             const SizedBox(height: 16),
-            Text('Категория', style: labelStyle),
+            Text(l10n.categoryLabel, style: labelStyle),
             const SizedBox(height: 8),
             Wrap(
               spacing: 8,
@@ -101,7 +104,7 @@ class _AddTaskDialogState extends State<AddTaskDialog> {
                   .map(
                     (category) => ChoiceChip(
                       avatar: Icon(category.icon),
-                      label: Text(category.label),
+                      label: Text(category.label(l10n)),
                       selected: category == _selectedCategory,
                       onSelected: (_) {
                         setState(() {
@@ -113,14 +116,14 @@ class _AddTaskDialogState extends State<AddTaskDialog> {
                   .toList(),
             ),
             const SizedBox(height: 16),
-            Text('Приоритет', style: labelStyle),
+            Text(l10n.priorityLabel, style: labelStyle),
             const SizedBox(height: 8),
             SegmentedButton<TaskPriority>(
               segments: TaskPriority.values
                   .map(
                     (priority) => ButtonSegment(
                       value: priority,
-                      label: Text(priority.label),
+                      label: Text(priority.label(l10n)),
                     ),
                   )
                   .toList(),
@@ -137,7 +140,7 @@ class _AddTaskDialogState extends State<AddTaskDialog> {
       actions: [
         TextButton(
           onPressed: _isSubmitting ? null : () => Navigator.of(context).pop(),
-          child: const Text('Отмена'),
+          child: Text(l10n.cancel),
         ),
         FilledButton(
           onPressed: _isSubmitting ? null : () => _submit(),
@@ -147,7 +150,7 @@ class _AddTaskDialogState extends State<AddTaskDialog> {
                   height: 20,
                   child: CircularProgressIndicator(strokeWidth: 2),
                 )
-              : const Text('Добавить'),
+              : Text(l10n.add),
         ),
       ],
     );

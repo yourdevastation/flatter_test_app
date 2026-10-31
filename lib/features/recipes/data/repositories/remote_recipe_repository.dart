@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test_app/core/extensions/string_extension.dart';
+import 'package:flutter_test_app/core/models/app_failure.dart';
 import 'package:flutter_test_app/core/models/result.dart';
 import 'package:flutter_test_app/core/network/api_config.dart';
 import 'package:flutter_test_app/features/recipes/data/dto/recipe_page_dto.dart';
@@ -54,18 +55,18 @@ class RemoteRecipeRepository implements RecipeRepository {
 
       return Result.success(dto.toDomain(baseUri: _baseUri));
     } on DioException catch (error) {
-      return Result.failure(_describeError(error));
+      return Result.failure(_mapError(error));
     }
   }
 
-  String _describeError(DioException error) {
+  AppFailure _mapError(DioException error) {
     return switch (error.type) {
-      DioExceptionType.connectionTimeout || DioExceptionType.connectionError =>
-        'Сервер недоступен. Проверь, что бэкенд запущен.',
-      DioExceptionType.receiveTimeout => 'Сервер слишком долго отвечает.',
-      DioExceptionType.badResponse =>
-        'Сервер ответил ошибкой ${error.response?.statusCode}.',
-      _ => 'Не удалось загрузить рецепты.',
+      DioExceptionType.connectionTimeout ||
+      DioExceptionType.connectionError => AppFailure.connection,
+      DioExceptionType.sendTimeout ||
+      DioExceptionType.receiveTimeout => AppFailure.timeout,
+      DioExceptionType.badResponse => AppFailure.server,
+      _ => AppFailure.unknown,
     };
   }
 }

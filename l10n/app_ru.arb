@@ -1,0 +1,160 @@
+{
+  "@@locale": "ru",
+
+  "appTitle": "Мини-задачи",
+  "tabTasks": "Задачи",
+  "tabRecipes": "Рецепты",
+  "switchLanguage": "Сменить язык",
+
+  "retry": "Повторить",
+  "undo": "Отменить",
+  "add": "Добавить",
+  "cancel": "Отмена",
+  "yes": "Да",
+  "no": "Нет",
+  "descriptionTitle": "Описание",
+
+  "errorConnection": "Сервер недоступен. Проверь, что бэкенд запущен.",
+  "errorTimeout": "Сервер слишком долго отвечает.",
+  "errorServer": "Сервер ответил ошибкой.",
+  "errorNotFound": "Запись не найдена.",
+  "errorStorage": "Не удалось прочитать или сохранить данные на устройстве.",
+  "errorUnknown": "Что-то пошло не так.",
+
+  "tasksHint": "Нажми на карточку, чтобы открыть подробности",
+  "tasksLoadError": "Не удалось загрузить задачи",
+  "tasksEmpty": "Задач пока нет",
+  "taskNotFound": "Задача не найдена",
+  "taskAddedToFavorites": "«{title}» добавлена в избранное",
+  "@taskAddedToFavorites": {
+    "placeholders": {
+      "title": {"type": "String"}
+    }
+  },
+  "taskRemovedFromFavorites": "«{title}» убрана из избранного",
+  "@taskRemovedFromFavorites": {
+    "placeholders": {
+      "title": {"type": "String"}
+    }
+  },
+
+  "statsTotal": "Всего",
+  "statsCompleted": "Выполнено",
+  "statsActive": "Активно",
+
+  "filterAll": "Все",
+  "filterActive": "Активные",
+  "filterCompleted": "Завершённые",
+  "filterFavorite": "Избранные",
+
+  "priorityLow": "Низкий",
+  "priorityMedium": "Средний",
+  "priorityHigh": "Высокий",
+
+  "categoryStudy": "Учёба",
+  "categoryWork": "Работа",
+  "categoryShopping": "Покупки",
+  "categoryHealth": "Здоровье",
+  "categoryHome": "Дом",
+
+  "newTaskTitle": "Новая задача",
+  "taskTitleLabel": "Название",
+  "taskTitleHint": "Введите название задачи",
+  "taskTitleRequired": "Введите название задачи",
+  "taskDescriptionLabel": "Описание (необязательно)",
+  "categoryLabel": "Категория",
+  "priorityLabel": "Приоритет",
+
+  "addToFavorites": "В избранное",
+  "removeFromFavorites": "Убрать из избранного",
+  "markAsDone": "Отметить выполненной",
+  "markAsActive": "Вернуть в работу",
+  "noDescription": "Описание не добавлено",
+  "createdLabel": "Создана",
+  "statusLabel": "Статус",
+  "statusDone": "Выполнена",
+  "statusActive": "В работе",
+  "favoriteLabel": "Избранное",
+
+  "recipesSearchHint": "Поиск по названию",
+  "scrollToTop": "Наверх",
+  "recipesLoadError": "Не удалось загрузить рецепты",
+  "recipesNotFound": "Ничего не найдено",
+  "recipesNotFoundHint": "Попробуй изменить запрос",
+  "recipesEnd": "Это все рецепты",
+  "addToTasks": "Добавить в задачи",
+  "addedToTasks": "Добавлено в задачи",
+  "recipeAddedToTasks": "«{name}» добавлен в задачи",
+  "@recipeAddedToTasks": {
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "recipeLiked": "«{name}» добавлен в избранное",
+  "@recipeLiked": {
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "recipeUnliked": "«{name}» убран из избранного",
+  "@recipeUnliked": {
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "cookTaskTitle": "Приготовить: {name}",
+  "@cookTaskTitle": {
+    "description": "Название задачи, созданной из рецепта",
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "authorLabel": "Автор",
+  "unknownAuthor": "Неизвестен",
+  "cookingTimeLabel": "Время",
+  "updatedLabel": "Обновлён",
+
+  "minutesShort": "{count} мин",
+  "@minutesShort": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "hoursShort": "{count} ч",
+  "@hoursShort": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "hoursMinutesShort": "{hours} ч {minutes} мин",
+  "@hoursMinutesShort": {
+    "placeholders": {
+      "hours": {"type": "int"},
+      "minutes": {"type": "int"}
+    }
+  },
+  "minutesRangeShort": "{from}–{to} мин",
+  "@minutesRangeShort": {
+    "placeholders": {
+      "from": {"type": "int"},
+      "to": {"type": "int"}
+    }
+  },
+  "hoursRangeShort": "{from}–{to} ч",
+  "@hoursRangeShort": {
+    "placeholders": {
+      "from": {"type": "int"},
+      "to": {"type": "int"}
+    }
+  },
+
+  "today": "сегодня",
+  "yesterday": "вчера",
+  "daysAgo": "{days, plural, one{{days} день назад} few{{days} дня назад} many{{days} дней назад} other{{days} дня назад}}",
+  "@daysAgo": {
+    "description": "Русский различает формы one (21 день), few (2 дня), many (5 дней)",
+    "placeholders": {
+      "days": {"type": "int"}
+    }
+  }
+}

@@ -1,68 +1,15 @@
+import 'package:flutter_test_app/core/models/app_failure.dart';
 import 'package:flutter_test_app/core/models/result.dart';
+import 'package:flutter_test_app/features/tasks/data/seed/initial_tasks.dart';
 import 'package:flutter_test_app/features/tasks/domain/entities/task.dart';
 import 'package:flutter_test_app/features/tasks/domain/entities/task_category.dart';
 import 'package:flutter_test_app/features/tasks/domain/entities/task_priority.dart';
 import 'package:flutter_test_app/features/tasks/domain/repositories/task_repository.dart';
 
+/// Задачи в памяти, без сохранения. В приложении теперь используется
+/// DriftTaskRepository; этот класс — мок-реализация того же интерфейса.
 class InMemoryTaskRepository implements TaskRepository {
-  final List<Task> _tasks = [];
-
-  InMemoryTaskRepository() {
-    _generateInitialTasks();
-  }
-
-  void _generateInitialTasks() {
-    const initialData = [
-      (
-        'Изучить основы Flutter',
-        'Виджеты, layout и работа с состоянием',
-        TaskPriority.high,
-        TaskCategory.study,
-      ),
-      (
-        'Выполнить лабораторную работу',
-        'Список карточек с картинкой, иконкой и текстом',
-        TaskPriority.high,
-        TaskCategory.study,
-      ),
-      (
-        'Подготовить отчёт по проекту',
-        'Собрать результаты спринта и отправить команде',
-        TaskPriority.medium,
-        TaskCategory.work,
-      ),
-      (
-        'Составить список покупок',
-        'Овощи, крупы и что-нибудь к чаю',
-        TaskPriority.low,
-        TaskCategory.shopping,
-      ),
-      ('Сходить на тренировку', null, TaskPriority.medium, TaskCategory.health),
-      (
-        'Навести порядок на кухне',
-        'Помыть посуду и разобрать шкафчики',
-        TaskPriority.low,
-        TaskCategory.home,
-      ),
-    ];
-
-    for (var i = 0; i < initialData.length; i++) {
-      final (title, description, priority, category) = initialData[i];
-
-      _tasks.add(
-        Task(
-          id: 'task_$i',
-          title: title,
-          description: description,
-          isCompleted: i % 2 == 0,
-          isFavorite: i == 1,
-          priority: priority,
-          category: category,
-          createdAt: DateTime.now().subtract(Duration(days: i * 2)),
-        ),
-      );
-    }
-  }
+  final List<Task> _tasks = buildInitialTasks();
 
   @override
   Future<Result<List<Task>>> getTasks() async {
@@ -90,7 +37,7 @@ class InMemoryTaskRepository implements TaskRepository {
       createdAt: DateTime.now(),
     );
 
-    _tasks.add(task);
+    _tasks.insert(0, task);
 
     return Result.success(task);
   }
@@ -117,7 +64,7 @@ class InMemoryTaskRepository implements TaskRepository {
     final index = _tasks.indexWhere((task) => task.id == id);
 
     if (index == -1) {
-      return const Result.failure('Задача не найдена');
+      return const Result.failure(AppFailure.notFound);
     }
 
     final updatedTask = update(_tasks[index]);

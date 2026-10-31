@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:flutter_test_app/core/l10n/l10n.dart';
 import 'package:flutter_test_app/features/tasks/domain/entities/task_category.dart';
 
 extension TaskCategoryExtension on TaskCategory {
@@ -17,6 +18,14 @@ extension TaskCategoryExtension on TaskCategory {
     TaskCategory.shopping => _unsplash('1542838132-92c53300491e'),
     TaskCategory.health => _unsplash('1571019613454-1cb2f99b2d8b'),
     TaskCategory.home => _unsplash('1484154218962-a197022b5858'),
+  };
+
+  String label(AppLocale l10n) => switch (this) {
+    TaskCategory.study => l10n.categoryStudy,
+    TaskCategory.work => l10n.categoryWork,
+    TaskCategory.shopping => l10n.categoryShopping,
+    TaskCategory.health => l10n.categoryHealth,
+    TaskCategory.home => l10n.categoryHome,
   };
 }
 

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_test_app/core/l10n/l10n.dart';
 import 'package:flutter_test_app/features/tasks/domain/entities/task_stats.dart';
 
 class StatsCard extends StatelessWidget {
@@ -8,8 +9,8 @@ class StatsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
+    final l10n = context.l10n;
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Card(
       child: Padding(
@@ -18,17 +19,17 @@ class StatsCard extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
             _StatItem(
-              label: 'Всего',
+              label: l10n.statsTotal,
               value: '${stats.total}',
               color: colorScheme.primary,
             ),
             _StatItem(
-              label: 'Выполнено',
+              label: l10n.statsCompleted,
               value: '${stats.completed}',
               color: colorScheme.tertiary,
             ),
             _StatItem(
-              label: 'Активно',
+              label: l10n.statsActive,
               value: '${stats.active}',
               color: colorScheme.secondary,
             ),

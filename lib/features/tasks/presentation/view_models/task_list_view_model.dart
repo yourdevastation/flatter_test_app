@@ -6,6 +6,7 @@ import 'package:flutter_test_app/features/tasks/domain/entities/task_filter.dart
 import 'package:flutter_test_app/features/tasks/domain/entities/task_priority.dart';
 import 'package:flutter_test_app/features/tasks/domain/entities/task_stats.dart';
 import 'package:flutter_test_app/features/tasks/domain/repositories/task_repository.dart';
+import 'package:flutter_test_app/core/models/app_failure.dart';
 
 class TaskListViewModel extends ChangeNotifier {
   final TaskRepository _repository;
@@ -15,7 +16,7 @@ class TaskListViewModel extends ChangeNotifier {
   List<Task> _allTasks = [];
   TaskFilter _filter = TaskFilter.all;
   bool _isLoading = true;
-  String? _error;
+  AppFailure? _error;
 
   List<Task> get tasks => _getFilteredTasks();
 
@@ -23,7 +24,7 @@ class TaskListViewModel extends ChangeNotifier {
 
   bool get isLoading => _isLoading;
 
-  String? get error => _error;
+  AppFailure? get error => _error;
 
   TaskStats get stats => _calculateStats(_allTasks);
 
@@ -37,7 +38,7 @@ class TaskListViewModel extends ChangeNotifier {
     if (result.isSuccess && result.data != null) {
       _allTasks = result.data!;
     } else {
-      _error = result.error ?? 'Неизвестная ошибка';
+      _error = result.error ?? AppFailure.unknown;
     }
 
     _isLoading = false;
@@ -58,7 +59,8 @@ class TaskListViewModel extends ChangeNotifier {
     );
 
     if (result.isSuccess && result.data != null) {
-      _allTasks = [..._allTasks, result.data!];
+      // Новые задачи сверху: так же их отдаёт БД (ORDER BY created_at DESC).
+      _allTasks = [result.data!, ..._allTasks];
       notifyListeners();
     }
   }

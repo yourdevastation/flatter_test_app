@@ -1,0 +1,7 @@
+arb-dir: l10n
+template-arb-file: app_ru.arb
+output-localization-file: app_locale.dart
+output-dir: lib/core/l10n/generated
+output-class: AppLocale
+# AppLocale.of(context) возвращает не nullable-объект, без "!"
+nullable-getter: false

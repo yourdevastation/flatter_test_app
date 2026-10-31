@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test_app/core/extensions/date_time_extension.dart';
 import 'package:flutter_test_app/core/extensions/snack_bar_extension.dart';
+import 'package:flutter_test_app/core/l10n/l10n.dart';
 import 'package:flutter_test_app/core/widgets/app_bar_circle.dart';
 import 'package:flutter_test_app/core/widgets/card_image.dart';
 import 'package:flutter_test_app/core/widgets/info_section.dart';
+import 'package:flutter_test_app/core/widgets/like_icon.dart';
 import 'package:flutter_test_app/features/recipes/domain/entities/recipe.dart';
+import 'package:flutter_test_app/features/recipes/presentation/bloc/like_bloc.dart';
 import 'package:flutter_test_app/features/recipes/presentation/mappers/recipe_card_mapper.dart';
+import 'package:flutter_test_app/features/recipes/presentation/recipe_like_actions.dart';
 import 'package:flutter_test_app/features/recipes/presentation/widgets/cooking_time_chip.dart';
 
 typedef AddRecipeToTasksCallback = Future<void> Function(Recipe recipe);
@@ -45,7 +50,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
     });
 
     context.showAppSnackBar(
-      message: '«${widget.recipe.name}» добавлен в задачи',
+      message: context.l10n.recipeAddedToTasks(widget.recipe.name),
       icon: Icons.playlist_add_check,
     );
   }
@@ -62,6 +67,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
             pinned: true,
             stretch: true,
             leading: const AppBarCircle(child: BackButton()),
+            actions: [AppBarCircle(child: _LikeButton(recipe: recipe))],
             flexibleSpace: FlexibleSpaceBar(
               stretchModes: const [StretchMode.zoomBackground],
               background: CardImage(
@@ -83,9 +89,33 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                   child: CircularProgressIndicator(strokeWidth: 2),
                 )
               : Icon(_isAdded ? Icons.check : Icons.add_task),
-          label: Text(_isAdded ? 'Добавлено в задачи' : 'Добавить в задачи'),
+          label: Text(
+            _isAdded ? context.l10n.addedToTasks : context.l10n.addToTasks,
+          ),
         ),
       ),
+    );
+  }
+}
+
+class _LikeButton extends StatelessWidget {
+  const _LikeButton({required this.recipe});
+
+  final Recipe recipe;
+
+  @override
+  Widget build(BuildContext context) {
+    // select: кнопка перерисовывается, только когда меняется лайк
+    // именно этого рецепта, а не любой из likedIds.
+    final isLiked = context.select<LikeBloc, bool>(
+      (bloc) => bloc.state.isLiked(recipe.id),
+    );
+    final l10n = context.l10n;
+
+    return IconButton(
+      tooltip: isLiked ? l10n.removeFromFavorites : l10n.addToFavorites,
+      onPressed: () => setRecipeLiked(context, recipe, isLiked: !isLiked),
+      icon: LikeIcon(isLiked: isLiked),
     );
   }
 }
@@ -97,9 +127,10 @@ class _RecipeDetails extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final theme = Theme.of(context);
     final categoryName = recipe.categoryName;
-    final cookingTime = recipe.cookingTimeLabel;
+    final cookingTime = recipe.cookingTimeLabel(l10n);
     final updatedAt = recipe.updatedAt;
 
     return Padding(
@@ -128,7 +159,7 @@ class _RecipeDetails extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 20),
-          Text('Описание', style: theme.textTheme.titleSmall),
+          Text(l10n.descriptionTitle, style: theme.textTheme.titleSmall),
           const SizedBox(height: 6),
           Text(recipe.description, style: theme.textTheme.bodyLarge),
           const SizedBox(height: 24),
@@ -136,22 +167,22 @@ class _RecipeDetails extends StatelessWidget {
             rows: [
               InfoRow(
                 icon: Icons.person_outline,
-                label: 'Автор',
-                value: recipe.authorName ?? 'Неизвестен',
+                label: l10n.authorLabel,
+                value: recipe.authorName ?? l10n.unknownAuthor,
               ),
               if (cookingTime != null)
                 InfoRow(
                   icon: Icons.schedule,
-                  label: 'Время',
+                  label: l10n.cookingTimeLabel,
                   value: cookingTime,
                 ),
               if (updatedAt != null)
                 InfoRow(
                   icon: Icons.update,
-                  label: 'Обновлён',
+                  label: l10n.updatedLabel,
                   value:
-                      '${updatedAt.toShortDate()} · '
-                      '${updatedAt.toRelativeDay()}',
+                      '${updatedAt.toShortDate(l10n)} · '
+                      '${updatedAt.toRelativeDay(l10n)}',
                 ),
             ],
           ),

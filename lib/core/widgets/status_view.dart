@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_test_app/core/l10n/l10n.dart';
 
 /// Заглушка на весь экран: пустой список, ошибка, ничего не найдено.
 class StatusView extends StatelessWidget {
@@ -46,7 +47,7 @@ class StatusView extends StatelessWidget {
             ],
             if (onRetry != null) ...[
               const SizedBox(height: 16),
-              FilledButton(onPressed: onRetry, child: const Text('Повторить')),
+              FilledButton(onPressed: onRetry, child: Text(context.l10n.retry)),
             ],
           ],
         ),

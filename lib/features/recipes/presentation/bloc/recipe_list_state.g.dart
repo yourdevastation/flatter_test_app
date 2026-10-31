@@ -17,7 +17,7 @@ abstract class _$RecipeListStateCWProxy {
 
   RecipeListState isLoadingMore(bool isLoadingMore);
 
-  RecipeListState error(String? error);
+  RecipeListState error(AppFailure? error);
 
   /// Creates a new instance with the provided field values.
   /// Omitted fields keep their values; explicit `null` clears nullable fields.
@@ -33,7 +33,7 @@ abstract class _$RecipeListStateCWProxy {
     int? nextPage,
     bool isLoading,
     bool isLoadingMore,
-    String? error,
+    AppFailure? error,
   });
 }
 
@@ -61,7 +61,7 @@ class _$RecipeListStateCWProxyImpl implements _$RecipeListStateCWProxy {
       call(isLoadingMore: isLoadingMore);
 
   @override
-  RecipeListState error(String? error) => call(error: error);
+  RecipeListState error(AppFailure? error) => call(error: error);
 
   /// Creates a new instance with the provided field values.
   /// Omitted fields keep their values; explicit `null` clears nullable fields.
@@ -105,7 +105,7 @@ class _$RecipeListStateCWProxyImpl implements _$RecipeListStateCWProxy {
       error: error == const $CopyWithPlaceholder()
           ? _value.error
           // ignore: cast_nullable_to_non_nullable
-          : error as String?,
+          : error as AppFailure?,
     );
   }
 }
