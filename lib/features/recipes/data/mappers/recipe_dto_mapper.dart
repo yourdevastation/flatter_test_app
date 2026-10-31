@@ -1,7 +1,9 @@
 import 'package:flutter_test_app/core/extensions/string_extension.dart';
 import 'package:flutter_test_app/features/recipes/data/dto/author_dto.dart';
 import 'package:flutter_test_app/features/recipes/data/dto/recipe_dto.dart';
+import 'package:flutter_test_app/features/recipes/data/dto/recipe_page_dto.dart';
 import 'package:flutter_test_app/features/recipes/domain/entities/recipe.dart';
+import 'package:flutter_test_app/features/recipes/domain/entities/recipe_page.dart';
 
 extension RecipeDtoMapper on RecipeDto {
   /// [baseUri] нужен, потому что сервер отдаёт картинки относительными путями
@@ -27,6 +29,13 @@ extension RecipeDtoMapper on RecipeDto {
 
     return baseUri.resolve(imageUrl).toString();
   }
+}
+
+extension RecipePageDtoMapper on RecipePageDto {
+  RecipePage toDomain({required Uri baseUri}) => RecipePage(
+    recipes: [...?data?.map((dto) => dto.toDomain(baseUri: baseUri))],
+    nextPage: meta?.pagination?.next,
+  );
 }
 
 extension on AuthorDto {

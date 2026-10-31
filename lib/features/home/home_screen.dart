@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_test_app/features/recipes/data/repositories/remote_recipe_repository.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test_app/features/recipes/domain/entities/recipe.dart';
 import 'package:flutter_test_app/features/recipes/domain/repositories/recipe_repository.dart';
+import 'package:flutter_test_app/features/recipes/presentation/bloc/recipe_list_bloc.dart';
+import 'package:flutter_test_app/features/recipes/presentation/bloc/recipe_list_event.dart';
 import 'package:flutter_test_app/features/recipes/presentation/screens/recipe_list_screen.dart';
 import 'package:flutter_test_app/features/tasks/data/repositories/in_memory_task_repository.dart';
 import 'package:flutter_test_app/features/tasks/domain/entities/task_category.dart';
@@ -22,7 +24,6 @@ class _HomeScreenState extends State<HomeScreen> {
   final TaskListViewModel _taskViewModel = TaskListViewModel(
     InMemoryTaskRepository(),
   );
-  final RecipeRepository _recipeRepository = RemoteRecipeRepository();
   int _selectedIndex = 0;
 
   @override
@@ -60,9 +61,11 @@ class _HomeScreenState extends State<HomeScreen> {
               index: _selectedIndex,
               children: [
                 TaskListScreen(viewModel: _taskViewModel),
-                RecipeListScreen(
-                  repository: _recipeRepository,
-                  onAddToTasks: _addRecipeToTasks,
+                BlocProvider<RecipeListBloc>(
+                  create: (context) =>
+                      RecipeListBloc(context.read<RecipeRepository>())
+                        ..add(const RecipeListLoadRequested()),
+                  child: RecipeListScreen(onAddToTasks: _addRecipeToTasks),
                 ),
               ],
             ),

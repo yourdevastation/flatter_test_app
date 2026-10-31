@@ -3,9 +3,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_test_app/core/extensions/string_extension.dart';
 import 'package:flutter_test_app/core/models/result.dart';
 import 'package:flutter_test_app/core/network/api_config.dart';
-import 'package:flutter_test_app/features/recipes/data/dto/recipe_dto.dart';
+import 'package:flutter_test_app/features/recipes/data/dto/recipe_page_dto.dart';
 import 'package:flutter_test_app/features/recipes/data/mappers/recipe_dto_mapper.dart';
-import 'package:flutter_test_app/features/recipes/domain/entities/recipe.dart';
+import 'package:flutter_test_app/features/recipes/domain/entities/recipe_page.dart';
 import 'package:flutter_test_app/features/recipes/domain/repositories/recipe_repository.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 
@@ -35,24 +35,24 @@ class RemoteRecipeRepository implements RecipeRepository {
   }
 
   @override
-  Future<Result<List<Recipe>>> getRecipes({String? query}) async {
+  Future<Result<RecipePage>> getRecipes({
+    String? query,
+    int page = 1,
+    int pageSize = 10,
+  }) async {
     try {
-      final response = await _dio.get<List<dynamic>>(
+      final response = await _dio.get<Map<String, dynamic>>(
         '/recipe',
         queryParameters: {
           if (query != null && query.isNotBlank) 'name': query.trimmed(),
+          'page': page,
+          'size': pageSize,
         },
       );
 
-      final recipes = (response.data ?? [])
-          .map(
-            (json) =>
-                RecipeDto.fromJson(json as Map<String, dynamic>)
-                    .toDomain(baseUri: _baseUri),
-          )
-          .toList();
+      final dto = RecipePageDto.fromJson(response.data ?? const {});
 
-      return Result.success(recipes);
+      return Result.success(dto.toDomain(baseUri: _baseUri));
     } on DioException catch (error) {
       return Result.failure(_describeError(error));
     }
